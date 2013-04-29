@@ -16,30 +16,30 @@ main = do
             "kubun_id", "kubun_name"
             ]
         db04 = insert db03 "shohin"
-            [ Just "1"
-            , Just "apple"
-            , Just "1"
-            , Just"300"
+            [ VInt 1
+            , VText "apple"
+            , VInt 1
+            , VInt 300
             ]
         db05 = insert db04 "shohin"
-            [ Just "2"
-            , Just "orange"
-            , Just "1"
-            , Just "130"
+            [ VInt 2
+            , VText "orange"
+            , VInt 1
+            , VInt 130
             ]
         db06 = insert db05 "shohin"
-            [ Just "3"
-            , Just "cabbage"
-            , Just "2"
-            , Just "200"
+            [ VInt 3
+            , VText "cabbage"
+            , VInt 2
+            , VInt 200
             ]
         db07 = insert db06 "kubun"
-            [ Just "1"
-            , Just "fruits"
+            [ VInt 1
+            , VText "fruits"
             ]
         db08 = insert db07 "kubun"
-            [ Just "2"
-            , Just "vegetables"
+            [ VInt 2
+            , VText "vegetables"
             ]
     print db08
     print $ select ["shohin_name", "kubun_id"] <$> from db08 "shohin"

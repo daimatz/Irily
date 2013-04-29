@@ -9,8 +9,14 @@ import           Data.Text           (Text)
 type Relation = ([Text], [Tuple])
 type Table = Relation
 type Database = Map Text Table
-type Tuple = [Maybe Text]
+type Tuple = [Value]
 -- type Column = (Text, Text)
+
+data Value
+    = VInt  Int
+    | VText Text
+    | VNull
+  deriving (Show, Read, Eq, Ord)
 
 newDB :: Map Text Table
 newDB = Map.fromList []
