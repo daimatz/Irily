@@ -1,18 +1,17 @@
 module Database.Irily
     where
 
--- import           Control.Monad.State
-import           Data.List  (elemIndex)
-import           Data.Map   (Map)
-import qualified Data.Map   as Map
-import           Data.Maybe (fromJust, mapMaybe)
-import           Data.Text  (Text)
+import           Control.Monad.State
+import           Data.List           (elemIndex)
+import           Data.Map            (Map)
+import qualified Data.Map            as Map
+import           Data.Maybe          (fromJust, mapMaybe)
+import           Data.Text           (Text)
 
 type Relation = ([Text], [Tuple])
 type Table = Relation
 type Database = Map Text Table
 type Tuple = [Value]
--- type Column = (Text, Text)
 
 data Value
     = VInt  Int
@@ -20,12 +19,14 @@ data Value
     | VNull
   deriving (Show, Read, Eq, Ord)
 
-newDB :: Map Text Table
+newDB :: Database
 newDB = Map.fromList []
 
-create :: Database -> Text -> [Text] -> Database
-create db tableName columnNames =
-    Map.insert tableName (columnNames, []) db
+create :: Text -> [Text] -> State Database ()
+create tableName columnNames = state $ \db ->
+    ( ()
+    , Map.insert tableName (columnNames, []) db
+    )
 
 from :: Database -> Text -> Maybe Relation
 from db name = Map.lookup name db
@@ -52,6 +53,8 @@ lessThan column value relation =
     int (VInt x) = x
     int _        = error "not int"
 
-insert :: Database -> Text -> Tuple -> Database
-insert db name tuple =
-    Map.update (\table -> Just (fst table, snd table ++ [tuple])) name db
+insert :: Text -> Tuple -> State Database ()
+insert name tuple = state $ \db ->
+    ( ()
+    , Map.update (\table -> Just (fst table, snd table ++ [tuple])) name db
+    )

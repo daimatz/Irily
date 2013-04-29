@@ -3,46 +3,50 @@
 module Main where
 
 import           Control.Applicative ((<$>))
+import           Control.Monad.State
 
 import           Database.Irily
 
 main :: IO ()
 main = do
-    let db01 = newDB
-        db02 = create db01 "shohin" [
-            "shohin_id", "shohin_name", "kubun_id", "price"
-            ]
-        db03 = create db02 "kubun" [
-            "kubun_id", "kubun_name"
-            ]
-        db04 = insert db03 "shohin"
-            [ VInt 1
-            , VText "apple"
-            , VInt 1
-            , VInt 300
-            ]
-        db05 = insert db04 "shohin"
-            [ VInt 2
-            , VText "orange"
-            , VInt 1
-            , VInt 130
-            ]
-        db06 = insert db05 "shohin"
-            [ VInt 3
-            , VText "cabbage"
-            , VInt 2
-            , VInt 200
-            ]
-        db07 = insert db06 "kubun"
-            [ VInt 1
-            , VText "fruits"
-            ]
-        db08 = insert db07 "kubun"
-            [ VInt 2
-            , VText "vegetables"
-            ]
-    print db08
-    print $ select ["shohin_name", "kubun_id"] <$> from db08 "shohin"
+    let db = snd $ runState database newDB
+    print $ select ["shohin_name", "kubun_id"]
+        <$> from db "shohin"
     print $ select ["shohin_name"]
         <$> lessThan "price" 250
-        <$> from db08 "shohin"
+        <$> from db "shohin"
+
+database :: State Database ()
+database = do
+    create "shohin" [
+        "shohin_id", "shohin_name", "kubun_id", "price"
+        ]
+    create "kubun" [
+        "kubun_id", "kubun_name"
+        ]
+    insert "shohin"
+        [ VInt 1
+        , VText "apple"
+        , VInt 1
+        , VInt 300
+        ]
+    insert "shohin"
+        [ VInt 2
+        , VText "orange"
+        , VInt 1
+        , VInt 130
+        ]
+    insert "shohin"
+        [ VInt 3
+        , VText "cabbage"
+        , VInt 2
+        , VInt 200
+        ]
+    insert "kubun"
+        [ VInt 1
+        , VText "fruits"
+        ]
+    insert "kubun"
+        [ VInt 2
+        , VText "vegetables"
+        ]
