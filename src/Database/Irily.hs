@@ -42,6 +42,16 @@ select columns relation =
     g :: Tuple -> Int -> Value
     g tuple idx = tuple !! idx
 
+lessThan :: Text -> Int -> Relation -> Relation
+lessThan column value relation =
+    let idx = fromJust $ elemIndex column $ fst relation
+    in  ( fst relation
+        , filter (\ts -> int (ts !! idx) < value) $ snd relation
+        )
+  where
+    int (VInt x) = x
+    int _        = error "not int"
+
 insert :: Database -> Text -> Tuple -> Database
 insert db name tuple =
     Map.update (\table -> Just (fst table, snd table ++ [tuple])) name db

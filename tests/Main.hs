@@ -43,3 +43,6 @@ main = do
             ]
     print db08
     print $ select ["shohin_name", "kubun_id"] <$> from db08 "shohin"
+    print $ select ["shohin_name"]
+        <$> lessThan "price" 250
+        <$> from db08 "shohin"
