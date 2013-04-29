@@ -2,11 +2,11 @@ module Database.Irily
     where
 
 -- import           Control.Monad.State
-import           Data.List   (elemIndex)
-import           Data.Map    (Map)
-import qualified Data.Map    as Map
-import           Data.Maybe  (fromJust, mapMaybe)
-import           Data.Text   (Text)
+import           Data.List  (elemIndex)
+import           Data.Map   (Map)
+import qualified Data.Map   as Map
+import           Data.Maybe (fromJust, mapMaybe)
+import           Data.Text  (Text)
 
 type Relation = ([Text], [Tuple])
 type Table = Relation
