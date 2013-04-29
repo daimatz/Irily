@@ -2,9 +2,11 @@ module Database.Irily
     where
 
 -- import           Control.Monad.State
-import           Data.Map            (Map)
-import qualified Data.Map            as Map
-import           Data.Text           (Text)
+import           Data.List   (elemIndex)
+import           Data.Map    (Map)
+import qualified Data.Map    as Map
+import           Data.Maybe  (fromJust, mapMaybe)
+import           Data.Text   (Text)
 
 type Relation = ([Text], [Tuple])
 type Table = Relation
@@ -30,7 +32,15 @@ from db name = Map.lookup name db
 
 select :: [Text] -> Relation -> Relation
 select columns relation =
-    unzip $ filter (\r -> fst r `elem` columns) $ uncurry zip relation
+    let idxs = mapMaybe (flip elemIndex $ fst relation) columns
+    in  ( columns
+        , f idxs $ snd relation
+        )
+  where
+    f :: [Int] -> [Tuple] -> [Tuple]
+    f idxs = map $ \tuple -> map (g tuple) idxs
+    g :: Tuple -> Int -> Value
+    g tuple idx = tuple !! idx
 
 insert :: Database -> Text -> Tuple -> Database
 insert db name tuple =
