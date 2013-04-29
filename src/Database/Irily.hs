@@ -1,30 +1,31 @@
 module Database.Irily
     where
 
-import           Control.Monad.State
+-- import           Control.Monad.State
 import           Data.Map            (Map)
 import qualified Data.Map            as Map
 import           Data.Text           (Text)
 
-data Relation = Relation
-    { relationColumns :: [Column]
-    , relationTuples  :: [Tuple]
-    }
-  deriving (Show, Read, Eq, Ord)
+type Relation = ([Text], [Tuple])
+type Table = Relation
+type Database = Map Text Table
+type Tuple = [Maybe Text]
+-- type Column = (Text, Text)
 
-data Table = Table
-    { tableName     :: Text
-    , tableRelation :: Relation
-    }
-  deriving (Show, Read, Eq, Ord)
+newDB :: Map Text Table
+newDB = Map.fromList []
 
-data Tuple = Tuple
-    { tupleValues :: [Text]
-    }
-  deriving (Show, Read, Eq, Ord)
+create :: Database -> Text -> [Text] -> Database
+create db tableName columnNames =
+    Map.insert tableName (columnNames, []) db
 
-data Column = Column
-    { columnParent :: Text
-    , columnName   :: Text
-    }
-  deriving (Show, Read, Eq, Ord)
+from :: Database -> Text -> Maybe Relation
+from db name = Map.lookup name db
+
+select :: [Text] -> Relation -> Relation
+select columns relation =
+    unzip $ filter (\r -> fst r `elem` columns) $ uncurry zip relation
+
+insert :: Database -> Text -> Tuple -> Database
+insert db name tuple =
+    Map.update (\table -> Just (fst table, snd table ++ [tuple])) name db
