@@ -1,4 +1,3 @@
-### /Users/dai/.gitignore-boilerplates/haskell.gitignore
 
 dist
 cabal-dev
@@ -9,7 +8,6 @@ cabal-dev
 .virthualenv
 
 
-### /Users/dai/.gitignore-boilerplates/Global/osx.gitignore
 
 .DS_Store
 .AppleDouble
@@ -17,18 +15,14 @@ cabal-dev
 Icon
 
 
-# Thumbnails
 ._*
 
-# Files that might appear on external disk
 .Spotlight-V100
 .Trashes
 
-
-### /Users/dai/.gitignore-boilerplates/Global/linux.gitignore
 
 .*
 !.gitignore
 *~
 
-
+*.db
