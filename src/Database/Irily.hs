@@ -3,7 +3,7 @@ module Database.Irily
 
 import           Control.Monad.State
 import           Data.List           (elemIndex)
-import           Data.Map            (Map)
+import           Data.Map            (Map, (!))
 import qualified Data.Map            as Map
 import           Data.Maybe          (fromJust, mapMaybe)
 import           Data.Text           (Text)
@@ -19,16 +19,20 @@ data Value
     | VNull
   deriving (Show, Read, Eq, Ord)
 
+type DBAccess a = StateT Database IO a
+
 newDB :: Database
 newDB = Map.fromList []
 
-create :: Text -> [Text] -> State Database ()
+create :: Text -> [Text] -> DBAccess ()
 create tableName columnNames = do
     db <- get
     put $ Map.insert tableName (columnNames, []) db
 
-from :: Database -> Text -> Maybe Relation
-from db name = Map.lookup name db
+from :: Text -> DBAccess Relation
+from name = do
+    db <- get
+    return $ db ! name
 
 select :: [Text] -> Relation -> Relation
 select columns relation =
@@ -52,7 +56,7 @@ lessThan column value relation =
     int (VInt x) = x
     int _        = error "not int"
 
-insert :: Text -> Tuple -> State Database ()
+insert :: Text -> Tuple -> DBAccess ()
 insert name tuple = do
     db <- get
     put $ Map.update (\table -> Just (fst table, snd table ++ [tuple])) name db

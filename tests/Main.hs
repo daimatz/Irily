@@ -9,14 +9,10 @@ import           Database.Irily
 
 main :: IO ()
 main = do
-    let db = snd $ runState database newDB
-    print $ select ["shohin_name", "kubun_id"]
-        <$> from db "shohin"
-    print $ select ["shohin_name"]
-        <$> lessThan "price" 250
-        <$> from db "shohin"
+    runStateT database newDB
+    return ()
 
-database :: State Database ()
+database :: DBAccess ()
 database = do
     create "shohin" [
         "shohin_id", "shohin_name", "kubun_id", "price"
@@ -50,3 +46,9 @@ database = do
         [ VInt 2
         , VText "vegetables"
         ]
+
+    r1 <- select ["shohin_name", "kubun_id"] <$> from "shohin"
+    liftIO $ print r1
+
+    r2 <- select ["shohin_name"] <$> lessThan "price" 250 <$> from "shohin"
+    liftIO $ print r2
