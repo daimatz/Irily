@@ -23,10 +23,9 @@ newDB :: Database
 newDB = Map.fromList []
 
 create :: Text -> [Text] -> State Database ()
-create tableName columnNames = state $ \db ->
-    ( ()
-    , Map.insert tableName (columnNames, []) db
-    )
+create tableName columnNames = do
+    db <- get
+    put $ Map.insert tableName (columnNames, []) db
 
 from :: Database -> Text -> Maybe Relation
 from db name = Map.lookup name db
@@ -54,7 +53,6 @@ lessThan column value relation =
     int _        = error "not int"
 
 insert :: Text -> Tuple -> State Database ()
-insert name tuple = state $ \db ->
-    ( ()
-    , Map.update (\table -> Just (fst table, snd table ++ [tuple])) name db
-    )
+insert name tuple = do
+    db <- get
+    put $ Map.update (\table -> Just (fst table, snd table ++ [tuple])) name db
