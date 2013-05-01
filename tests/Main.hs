@@ -47,7 +47,7 @@ database = do
         , VText "vegetables"
         ]
 
-    r1 <- select ["shohin_name", "kubun_id"]
+    r1 <- selectAll
         <$> from "shohin"
     liftIO $ print r1
 
@@ -57,7 +57,8 @@ database = do
     liftIO $ print r2
 
     r3 <- select ["shohin_name"]
-        <$> (select ["shohin_name", "kubun_id"]
+        <$> "kubun_id" .=. VInt 1
+        <$> (selectAll
             <$> from "shohin"
             )
     liftIO $ print r3

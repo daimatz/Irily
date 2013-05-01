@@ -34,6 +34,9 @@ create tableName columnNames = do
 from :: Text -> DBAccess Relation
 from name = (! name) <$> get
 
+selectAll :: Relation -> Relation
+selectAll = id
+
 select :: [Text] -> Relation -> Relation
 select columns relation =
     let idxs = mapMaybe (flip elemIndex $ fst relation) columns
@@ -47,17 +50,24 @@ select columns relation =
     g :: Tuple -> Int -> Value
     g tuple idx = tuple !! idx
 
-(.<.) :: Text -> Value -> Filter
-column .<. value = \relation ->
-    let idx = fromJust $ elemIndex column $ fst relation
-    in  ( fst relation
-        , filter (\ts -> int (ts !! idx) < int value) $ snd relation
-        )
-  where
-    int (VInt x) = x
-    int _        = error "not int"
-
 insert :: Text -> Tuple -> DBAccess ()
 insert name tuple = do
     db <- get
     put $ Map.update (\table -> Just (fst table, snd table ++ [tuple])) name db
+
+mkFilter :: Text -> (Value -> Bool) -> Filter
+mkFilter column p relation =
+    let idx = fromJust $ elemIndex column $ fst relation
+    in
+        ( fst relation
+        , filter (\tuple -> p (tuple !! idx)) $ snd relation
+        )
+
+(.<.) :: Text -> Value -> Filter
+column .<. value = mkFilter column $ \v -> int v < int value
+  where
+    int (VInt x) = x
+    int _        = error "not int"
+
+(.=.) :: Text -> Value -> Filter
+column .=. value = mkFilter column $ \v -> v == value
