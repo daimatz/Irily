@@ -47,8 +47,17 @@ database = do
         , VText "vegetables"
         ]
 
-    r1 <- select ["shohin_name", "kubun_id"] <$> from "shohin"
+    r1 <- select ["shohin_name", "kubun_id"]
+        <$> from "shohin"
     liftIO $ print r1
 
-    r2 <- select ["shohin_name"] <$> lessThan "price" 250 <$> from "shohin"
+    r2 <- select ["shohin_name"]
+        <$> "price" .<. VInt 250
+        <$> from "shohin"
     liftIO $ print r2
+
+    r3 <- select ["shohin_name"]
+        <$> (select ["shohin_name", "kubun_id"]
+            <$> from "shohin"
+            )
+    liftIO $ print r3

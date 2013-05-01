@@ -1,6 +1,7 @@
 module Database.Irily
     where
 
+import           Control.Applicative ((<$>))
 import           Control.Monad.State
 import           Data.List           (elemIndex)
 import           Data.Map            (Map, (!))
@@ -12,6 +13,7 @@ type Relation = ([Text], [Tuple])
 type Table = Relation
 type Database = Map Text Table
 type Tuple = [Value]
+type Filter = Relation -> Relation
 
 data Value
     = VInt  Int
@@ -30,14 +32,13 @@ create tableName columnNames = do
     put $ Map.insert tableName (columnNames, []) db
 
 from :: Text -> DBAccess Relation
-from name = do
-    db <- get
-    return $ db ! name
+from name = (! name) <$> get
 
 select :: [Text] -> Relation -> Relation
 select columns relation =
     let idxs = mapMaybe (flip elemIndex $ fst relation) columns
-    in  ( columns
+    in
+        ( columns
         , f idxs $ snd relation
         )
   where
@@ -46,11 +47,11 @@ select columns relation =
     g :: Tuple -> Int -> Value
     g tuple idx = tuple !! idx
 
-lessThan :: Text -> Int -> Relation -> Relation
-lessThan column value relation =
+(.<.) :: Text -> Value -> Filter
+column .<. value = \relation ->
     let idx = fromJust $ elemIndex column $ fst relation
     in  ( fst relation
-        , filter (\ts -> int (ts !! idx) < value) $ snd relation
+        , filter (\ts -> int (ts !! idx) < int value) $ snd relation
         )
   where
     int (VInt x) = x
