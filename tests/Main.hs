@@ -8,11 +8,11 @@ import           Database.Irily
 
 main :: IO ()
 main = do
-    runStateT database newDB
+    runDB action newDB
     return ()
 
-database :: DBAccess ()
-database = do
+action :: DBAccess ()
+action = do
     create "shohin" [
         "shohin_id", "shohin_name", "kubun_id", "price"
         ]

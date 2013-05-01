@@ -27,6 +27,9 @@ data Value
 
 type DBAccess a = StateT Database IO a
 
+runDB :: DBAccess a -> Database -> IO Database
+runDB action db = snd <$> runStateT action db
+
 newDB :: Database
 newDB = Map.fromList []
 
