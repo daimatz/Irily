@@ -7,7 +7,11 @@ import           Data.List           (elemIndex)
 import           Data.Map            (Map, (!))
 import qualified Data.Map            as Map
 import           Data.Maybe          (fromJust, mapMaybe)
+import           Data.Monoid         ((<>))
 import           Data.Text           (Text)
+import qualified Data.Text           as T
+import qualified Data.Text.IO        as TIO
+import           Prelude             hiding (print)
 
 type Relation = ([Text], [Tuple])
 type Table = Relation
@@ -33,6 +37,18 @@ create tableName columnNames = do
 
 from :: Text -> DBAccess Relation
 from name = (! name) <$> get
+
+innerJoin :: Text -> Relation -> Relation -> Relation
+innerJoin column left right =
+    let newColumns = fst left ++ fst right
+        li         = fromJust $ elemIndex column $ fst left
+        ri         = fromJust $ elemIndex column $ fst right
+        newTuples  = [ l ++ r
+            | l <- snd left, r <- snd right,
+                l !! li == r !! ri
+            ]
+    in
+        ( newColumns, newTuples )
 
 selectAll :: Relation -> Relation
 selectAll = id
@@ -71,3 +87,18 @@ column .<. value = mkFilter column $ \v -> int v < int value
 
 (.=.) :: Text -> Value -> Filter
 column .=. value = mkFilter column $ \v -> v == value
+
+print :: Relation -> IO ()
+print relation =
+    let h = foldl1 (concatWith "|") $ fst relation
+        t = foldl1 (concatWith "\n") $
+            map (foldl1 (concatWith "|") . map value) $
+            snd relation
+    in
+        TIO.putStrLn $ h <> "\n" <> t <> "\n"
+  where
+    concatWith sep x y = x <> sep <> y
+    value (VInt x)  = textShow x
+    value (VText x) = x
+    value VNull     = "null"
+    textShow = T.pack . show

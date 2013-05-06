@@ -1,9 +1,8 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Main where
 
-import           Control.Applicative ((<$>))
+import           Control.Applicative ((<$>), (<*>))
 import           Control.Monad.State
+import           Prelude             hiding (print)
 
 import           Database.Irily
 
@@ -47,18 +46,25 @@ database = do
         , VText "vegetables"
         ]
 
-    r1 <- selectAll
+    liftIO . print
+        =<< selectAll
         <$> from "shohin"
-    liftIO $ print r1
 
-    r2 <- select ["shohin_name"]
+    liftIO . print
+        =<< selectAll <$> from "kubun"
+
+    liftIO . print
+        =<< select ["shohin_name", "price"]
+        <$> from "shohin"
+
+    liftIO . print
+        =<< selectAll
         <$> "price" .<. VInt 250
         <$> from "shohin"
-    liftIO $ print r2
 
-    r3 <- select ["shohin_name"]
-        <$> "kubun_id" .=. VInt 1
-        <$> (selectAll
-            <$> from "shohin"
+    liftIO . print
+        =<< selectAll
+        <$> (innerJoin "kubun_id"
+            <$> (selectAll <$> from "shohin")
+            <*> (selectAll <$> from "kubun")
             )
-    liftIO $ print r3

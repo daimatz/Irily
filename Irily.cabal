@@ -19,7 +19,7 @@ library
   hs-source-dirs:    src
   exposed-modules:   Database.Irily
   ghc-option:        -Wall -O2
-  -- extensions:        OverloadedStrings
+  extensions:        OverloadedStrings
   build-depends:
                        base ==4.5.*
                      , containers
