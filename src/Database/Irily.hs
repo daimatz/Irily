@@ -53,6 +53,28 @@ innerJoin column left right =
     in
         ( newColumns, newTuples )
 
+leftJoin :: Text -> Relation -> Relation -> Relation
+leftJoin column left right =
+    let newColumns = fst left ++ fst right
+    in
+        case elemIndex column $ fst right of
+        Nothing ->
+            ( newColumns
+            , map (++ replicate (length $ fst right) VNull) (snd left)
+            )
+        Just ri ->
+            let newTuples = map (f ri) (snd left)
+            in
+                ( newColumns, newTuples )
+  where
+    li = fromJust $ elemIndex column $ fst left
+    f ri l =
+        if any (\r -> l !! li == r !! ri) (snd right) then
+            join [ l ++ r | r <- snd right, l !! li == r !! ri ]
+        else
+            l ++ replicate (length $ fst right) VNull
+
+
 selectAll :: Relation -> Relation
 selectAll = id
 
@@ -65,9 +87,7 @@ select columns relation =
         )
   where
     f :: [Int] -> [Tuple] -> [Tuple]
-    f idxs = map $ \tuple -> map (g tuple) idxs
-    g :: Tuple -> Int -> Value
-    g tuple idx = tuple !! idx
+    f idxs = map $ \tuple -> map (tuple !!) idxs
 
 insert :: Text -> Tuple -> DBAccess ()
 insert name tuple = do

@@ -37,6 +37,24 @@ action = do
         , VInt 2
         , VInt 200
         ]
+    insert "shohin"
+        [ VInt 4
+        , VText "lemon"
+        , VInt 1
+        , VInt 100
+        ]
+    insert "shohin"
+        [ VInt 5
+        , VText "pencil"
+        , VNull
+        , VInt 60
+        ]
+    insert "shohin"
+        [ VInt 6
+        , VText "USB memory"
+        , VInt 3
+        , VInt 500
+        ]
     insert "kubun"
         [ VInt 1
         , VText "fruits"
@@ -65,6 +83,13 @@ action = do
     liftIO . print
         =<< selectAll
         <$> (innerJoin "kubun_id"
+            <$> (selectAll <$> from "shohin")
+            <*> (selectAll <$> from "kubun")
+            )
+
+    liftIO . print
+        =<< selectAll
+        <$> (leftJoin "kubun_id"
             <$> (selectAll <$> from "shohin")
             <*> (selectAll <$> from "kubun")
             )
